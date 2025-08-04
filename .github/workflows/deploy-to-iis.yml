@@ -1,0 +1,46 @@
+# Name of the workflow
+name: Build and Deploy .NET Framework App to IIS
+
+# Run this workflow on a push to the main branch
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    # This job must run on your self-hosted Windows runner
+    runs-on: self-hosted
+
+    steps:
+    # 1. Checks out your repository code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Add MSBuild to the PATH
+    # This action finds MSBuild.exe on your server, which is needed for .NET Framework
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    # 3. Add NuGet to the PATH
+    # This helps in restoring project dependencies
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    # 4. Restore NuGet packages for the solution
+    - name: Restore NuGet Packages
+      run: nuget restore Demo_Project.sln
+
+    # 5. Build the project and create a Web Deploy package
+    # This uses MSBuild to create a deployable .zip file
+    - name: Build and Publish
+      run: |
+        msbuild.exe Demo_Project.sln /nologo /nr:false /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="${{ github.workspace }}\deploy.zip"
+
+    # 6. Deploy the .zip package to IIS
+    # This uses a standard Microsoft tool for reliable deployments
+    - name: Deploy to IIS
+      uses: microsoft/web-deploy@v2
+      with:
+        website-name: ${{ secrets.IIS_WEBSITE_NAME }}
+        package: ${{ github.workspace }}\deploy.zip
