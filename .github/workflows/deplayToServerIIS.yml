@@ -29,6 +29,8 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     # Step 3: Restores all the necessary NuGet packages for your project
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
     - name: Restore NuGet Packages
       run: nuget restore ${{ env.PROJECT_PATH }}
 
