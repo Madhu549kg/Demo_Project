@@ -15,7 +15,7 @@ namespace Demo_Project.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "ddYour application descri ption page.";
+            ViewBag.Message = "Your apdplication descri ption page.";
 
             return View();
         }
