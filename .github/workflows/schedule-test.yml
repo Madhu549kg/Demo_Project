@@ -1,0 +1,13 @@
+name: Scheduled Test
+
+on:
+  schedule:
+    # This runs every 5 minutes to give us a quick result
+    - cron: '*/5 * * * *'
+
+jobs:
+  test-schedule:
+    # This uses a standard GitHub runner, not your server
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Workflow triggered at $(date)"
