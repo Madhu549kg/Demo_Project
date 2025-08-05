@@ -5,8 +5,8 @@ name: Manual Deploy to IIS
 on:
   workflow_dispatch:
   schedule:
-    # The cron string defines the schedule. This is for 10:00 AM IST daily.
-    - cron: '30 12 5 8 *'
+    # Runs at 13:00 UTC (6:30 PM IST) on August 5th.
+    - cron: '0 13 5 8 *'
 
 # Environment variables available to all jobs and steps.
 env:
