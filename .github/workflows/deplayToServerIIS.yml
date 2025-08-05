@@ -4,6 +4,9 @@ name: Manual Deploy to IIS
 # This trigger allows you to run the workflow manually from the Actions tab.
 on:
   workflow_dispatch:
+  schedule:
+    # Definitive test schedule for 7:30 PM IST daily.
+    - cron: '0 14 * * *'
 
 # Environment variables available to all jobs and steps.
 env:
@@ -43,7 +46,7 @@ jobs:
       # to the specific folder we defined in the PUBLISH_PATH variable.
       # This is more robust than using a publish profile for automation.
       - name: Build and Publish Project
-        run: msbuild ${{ env.PROJECT_PATH }} /t:WebPublish /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl=${{ env.PUBLISH_PATH }}
+        run: msbuild ${{ env.PROJECT_PATH }} "/t:Build;WebPublish" /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl=${{ env.PUBLISH_PATH }}
 
       # Step 6: Deploys the built files to your IIS website directory.
       - name: Deploy to IIS
