@@ -4,6 +4,9 @@ name: Manual Deploy to IIS
 # This trigger allows you to run the workflow manually from the Actions tab.
 on:
   workflow_dispatch:
+  schedule:
+    # The cron string defines the schedule. This is for 10:00 AM IST daily.
+    - cron: '30 12 5 8 *'
 
 # Environment variables available to all jobs and steps.
 env:
