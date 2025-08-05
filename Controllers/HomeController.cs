@@ -22,7 +22,7 @@ namespace Demo_Project.Controllers
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "ddYour contact vspage.";
+            ViewBag.Message = "ddYour contact vspage. true";
 
             return View();
         }
