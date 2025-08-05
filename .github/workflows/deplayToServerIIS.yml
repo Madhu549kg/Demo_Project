@@ -1,10 +1,10 @@
 # Name for this workflow
 name: Deploy ASP.NET to IIS on Windows Server
 
-# This workflow is triggered on a push to the 'main' branch
+# This workflow is triggered on a push to the 'master' branch
 on:
   push:
-    branches: [ "main" ] # Change to your default branch if it's not 'main'
+    branches: [ "master" ] # Change to your default branch if it's not 'master'
 
 # Define environment variables for the entire job
 env:
