@@ -1,0 +1,64 @@
+# Name for this workflow. Will appear in the Actions tab.
+name: Manual Deploy to IIS
+
+# This trigger allows you to run the workflow manually from the Actions tab.
+on:
+  workflow_dispatch:
+
+# Environment variables available to all jobs and steps.
+env:
+  # CORRECTED: The path to your project file, based on your screenshot.
+  PROJECT_PATH: 'Demo_Project.csproj'
+  
+  # The destination folder for your website on the server.
+  WEBSITE_PATH: 'C:\inetpub\wwwroot\DemoProject'
+  
+  # A dedicated folder for the build output.
+  PUBLISH_PATH: '${{ github.workspace }}\publish_output'
+
+jobs:
+  build-and-deploy:
+    # Runs on your self-hosted runner on the Windows Server.
+    runs-on: self-hosted
+
+    steps:
+      # Step 1: Checks out your repository code so the runner can access it.
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Reliably sets up the nuget.exe command-line tool.
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      # Step 3: Sets up MSBuild, finding it from your VS Build Tools installation.
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # Step 4: Restores the NuGet packages for your project.
+      - name: Restore NuGet Packages
+        run: nuget restore ${{ env.PROJECT_PATH }}
+
+      # Step 5: Builds the project in Release configuration and publishes the output
+      # to the specific folder we defined in the PUBLISH_PATH variable.
+      # This is more robust than using a publish profile for automation.
+      - name: Build and Publish Project
+        run: msbuild ${{ env.PROJECT_PATH }} /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl=${{ env.PUBLISH_PATH }}
+
+      # Step 6: Deploys the built files to your IIS website directory.
+      - name: Deploy to IIS
+        run: |
+          Write-Host "Deploying from ${{ env.PUBLISH_PATH }} to ${{ env.WEBSITE_PATH }}"
+          
+          # Import the IIS PowerShell module.
+          Import-Module WebAdministration
+          
+          # Stop the website to unlock files.
+          Stop-Website -Name "DemoProject"
+          
+          # Copy the new files from the publish output folder to the IIS website folder.
+          Copy-Item -Path "${{ env.PUBLISH_PATH }}\*" -Destination "${{ env.WEBSITE_PATH }}" -Recurse -Force
+          
+          # Start the website again.
+          Start-Website -Name "DemoProject"
+          
+          Write-Host "Deployment Complete!"
