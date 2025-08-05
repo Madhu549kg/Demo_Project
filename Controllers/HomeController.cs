@@ -15,7 +15,7 @@ namespace Demo_Project.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "master Your apxplicatvccion description page.master2";
+            ViewBag.Message = "master Your apxplicatvccion description page.master2 dede";
 
             return View();
         }
