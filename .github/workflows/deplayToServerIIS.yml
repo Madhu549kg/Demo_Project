@@ -7,6 +7,7 @@ on:
 
 # Environment variables available to all jobs and steps.
 env:
+  SOLUTION_PATH: 'Demo_Project.sln'
   # CORRECTED: The path to your project file, based on your screenshot.
   PROJECT_PATH: 'Demo_Project.csproj'
   
@@ -36,7 +37,7 @@ jobs:
 
       # Step 4: Restores the NuGet packages for your project.
       - name: Restore NuGet Packages
-        run: nuget restore ${{ env.PROJECT_PATH }}
+        run: nuget restore ${{ env.SOLUTION_PATH }}
 
       # Step 5: Builds the project in Release configuration and publishes the output
       # to the specific folder we defined in the PUBLISH_PATH variable.
