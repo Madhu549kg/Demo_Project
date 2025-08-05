@@ -1,0 +1,65 @@
+# Name for this workflow
+name: Deploy ASP.NET to IIS on Windows Server
+
+# This workflow is triggered on a push to the 'main' branch
+on:
+  push:
+    branches: [ "main" ] # Change to your default branch if it's not 'main'
+
+# Define environment variables for the entire job
+env:
+  # IMPORTANT: Make sure this is the correct relative path to your .csproj file
+  PROJECT_PATH: 'Demo_Project/Demo_Project.csproj' 
+  
+  # The physical path to your website folder in IIS
+  WEBSITE_PATH: 'C:\inetpub\wwwroot\DemoProject'   
+
+jobs:
+  build-and-deploy:
+    # This tells GitHub to run this job on your server
+    runs-on: self-hosted
+
+    steps:
+    # Step 1: Checks out your repository code so the runner can use it
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Finds the MSBuild tool from the Visual Studio Build Tools you installed
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    # Step 3: Restores all the necessary NuGet packages for your project
+    - name: Restore NuGet Packages
+      run: nuget restore ${{ env.PROJECT_PATH }}
+
+    # Step 4: Builds your project and creates a ready-to-deploy package
+    - name: Build and Publish Project
+      run: msbuild ${{ env.PROJECT_PATH }} /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
+      # Note: For this to work best, create a 'FolderProfile' in Visual Studio
+      # by right-clicking your project -> Publish -> Folder. Commit the .pubxml file.
+
+    # Step 5: Deploys the built files to your IIS website directory
+    - name: Deploy to IIS
+      run: |
+        # Find the path where MSBuild published the files
+        $publish_dir = Get-ChildItem -Path (Split-Path -Parent "${{ env.PROJECT_PATH }}") -Recurse -Directory -Filter "publish" | Select-Object -First 1 -ExpandProperty FullName
+        
+        if (-not $publish_dir) {
+          Write-Host "Publish directory not found! Build might have failed."
+          exit 1
+        }
+        
+        Write-Host "Publishing from: $publish_dir"
+        Write-Host "Deploying to: ${{ env.WEBSITE_PATH }}"
+        
+        # Stop the IIS Website before copying files
+        Import-Module WebAdministration
+        Stop-Website -Name "DemoProject"
+        
+        # Copy the new files, overwriting the old ones
+        Copy-Item -Path "$publish_dir\*" -Destination "${{ env.WEBSITE_PATH }}" -Recurse -Force
+        
+        # Start the IIS Website again
+        Start-Website -Name "DemoProject"
+        
+        Write-Host "Deployment Complete!"
