@@ -43,7 +43,7 @@ jobs:
       # to the specific folder we defined in the PUBLISH_PATH variable.
       # This is more robust than using a publish profile for automation.
       - name: Build and Publish Project
-        run: msbuild ${{ env.PROJECT_PATH }} /t:Build;WebPublish /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl=${{ env.PUBLISH_PATH }}
+        run: msbuild ${{ env.PROJECT_PATH }} "/t:Build;WebPublish" /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl=${{ env.PUBLISH_PATH }}
 
       # Step 6: Deploys the built files to your IIS website directory.
       - name: Deploy to IIS
